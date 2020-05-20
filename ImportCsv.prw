@@ -1,180 +1,176 @@
-#include 'totvs.ch'
-#include 'protheus.ch'
+#Include 'totvs.ch'
+#Include 'protheus.ch'
 //-------------------------------------------------------------------
-/*/{Protheus.doc} ACOM010
-Importação dados arquivo CSV
-@description Rotina para importar dados de arquivo padrão csv de PO para gerar Pedido de Compra
+/*/{Protheus.doc} ImportCsv
+ImportaÃ§Ã£o dados arquivo CSV
 
-@author		Dirlei@afsouza
-@since		10/01/2019
-@version	P12
+@description Rotina para importar dados de arquivo padrÃ£o csv para 
+gerar Pedido de Compra
+
+@author		Dirlei Friedrich
 
 @return 	Nil, nenhum
 
-@type function
+@type 		function
 /*/
 //-------------------------------------------------------------------
-user function ACOM010(oGetDados)
+User Function ImportCsv(oGetDados)
 
-local cFileTmp := CGetFile('Arquivos CSV|*.csv',"Selecione Arquivo",0,,.T.,GETF_LOCALHARD,.T.)
+Local cFileTmp := CGetFile('Arquivos CSV|*.csv',"Selecione Arquivo",0,,.T.,GETF_LOCALHARD,.T.)
 
-private nHandle := 0
-private nLast   := 0
+Private nHandle := 0
+Private nLast   := 0
 
 // Abre o arquivo
 nHandle := FT_FUse(cFileTmp)
 
 // Se houver erro de abertura abandona processamento
-if nHandle == -1
-    MsgAlert("O arquivo "+ cFileTmp +" não pode ser aberto!","Atenção")
-    return
-endif
+If nHandle == -1
+    MsgAlert("O arquivo "+ cFileTmp +" nÃ£o pode ser aberto!","AtenÃ§Ã£o")
+    Return
+EndIf
 
 // Posiciona na primeria linha
 FT_FGoTop()
 
-// Retorna o número de linhas do arquivo
+// Retorna o nÃºmero de linhas do arquivo
 nLast := FT_FLastRec()
 
 Processa( {|| fImpArq()}, "Aguarde... Importando dados." )
 	
-return
+Return
 
 
 //-------------------------------------------------------------------
 /*/{Protheus.doc} fImpArq
-Importa arquivo padrão csv
+Importa arquivo padrÃ£o csv
 
-@author		Dirlei@afsouza
-@since		10/01/2019  
-@version 	P12
+@author		Dirlei Friedrich
 
 @return		Nil, nenhum
 
 @type		function
 /*/
 //-------------------------------------------------------------------
-static function fImpArq()  
+Static Function fImpArq()  
 
-local cLinha := ""
-local aLinha := {}
-local aItens := {}
+Local cLinha := ""
+Local aLinha := {}
+Local aItens := {}
 
-// Pula linhas cabeçalho planilha
-FT_FSKIP(23)
+// Pula linhas cabeÃ§alho planilha
+FT_FSKIP(23) // verifique quantas linhas ocupa seu cabeÃ§alho 
 
 ProcRegua(0)
-while !FT_FEOF()
+While !FT_FEOF()
 	
 	IncProc("Verificando arquivo ...")
 	// Retorna a linha corrente
     cLinha := FT_FReadLn()
     
     aLinha := Separa(cLinha,';')
-    if val(aLinha[1]) > 0   
-    	aadd(aItens, aLinha)
-    endif
+    If Val(aLinha[1]) > 0   
+    	AAdd(aItens, aLinha)
+    EndIf
         
-    // Pula para próxima linha
+    // Pula para prÃ³xima linha
     FT_FSKIP()
-enddo
+EndDo
 
 // Fecha o Arquivo
 FT_FUSE()
 
-if !empty(aItens)
+If !Empty(aItens)
 	Processa( {|| fProcessa(aItens)}, "Gerando Pedido de Compra... Aguarde" )
-	
-endif
+EndIf
 
-return	
+Return	
 
 
 //-------------------------------------------------------------------
 /*/{Protheus.doc} fProcessa
-Grava informações no aCols do Pedido Compra
+Grava informaÃ§Ãµes no aCols do Pedido Compra
 
-@author		Dirlei@afsouza
-@since		10/01/2019
-@version 	P12
+@author		Dirlei Friedrich
 
-@param		aITens, array, dados da importação
+@param		aItens, array, dados da importaÃ§Ã£o
 
 @return 	Nil, nenhum
 
 @type		function
 /*/
 //-------------------------------------------------------------------
-static function fProcessa(aItens)   
+Static Function fProcessa(aItens)   
 
-local aArea    := GetArea()
-local aAreaSC7 := SC7->(GetArea())
-local nI       := 0
-local aParam   := {}
-local cFornece := Space(TamSX3('A2_COD')[1])
-local cLoja    := Space(TamSX3('A2_LOJA')[1])
-local cCondPag := Space(TamSX3('C7_COND')[1])
-local cContato := Space(TamSX3('C7_CONTATO')[1])
-local nMoeda   := 1
-local nTxMoeda := 0
-local cTes     := Space(TamSX3('F4_CODIGO')[1])
-local dEntrega := dDataBase
-local cIdPo    := Space(TamSX3('C7_XCODFOR')[1])
-local aRetorno := {}
-local aCabecPC := {}
-local aItensPC := {}
-local aLinha   := {}
-local cNumPC   := GetNumSC7()
-local cProduto := ''
-local cDescPro := ''
-local cUM      := ''
-local cLocal   := ''
-local cQuant   := '' // tratar ponto/virgula
-local cPreco   := '' // tratar ponto/virgula
-local nQuant   := 0
-local nPreco   := 0
-local nTotal   := 0
+Local aArea    := GetArea()
+Local aAreaSC7 := SC7->(GetArea())
+Local nI       := 0
+Local aParam   := {}
+Local cFornece := Space(TamSX3('A2_COD')[1])
+Local cLoja    := Space(TamSX3('A2_LOJA')[1])
+Local cCondPag := Space(TamSX3('C7_COND')[1])
+Local cContato := Space(TamSX3('C7_CONTATO')[1])
+Local nMoeda   := 1
+Local nTxMoeda := 0
+Local cTes     := Space(TamSX3('F4_CODIGO')[1])
+Local dEntrega := dDataBase
+Local cIdPo    := Space(TamSX3('C7_XCODFOR')[1]) //Campo customizado
+Local aRetorno := {}
+Local aCabecPC := {}
+Local aItensPC := {}
+Local aLinha   := {}
+Local cNumPC   := GetNumSC7()
+Local cProduto := ''
+Local cDescPro := ''
+Local cUM      := ''
+Local cLocal   := ''
+Local cQuant   := '' // tratar ponto/virgula
+Local cPreco   := '' // tratar ponto/virgula
+Local nQuant   := 0
+Local nPreco   := 0
+Local nTotal   := 0
 
-private lMsHelpAuto := .t.
-private lMsErroAuto := .f.
+Private lMsHelpAuto := .T.
+Private lMsErroAuto := .F.
 
-// tipo, descricao, inicializador, picture, validacao, F3,when, obrigatorio
-aadd(aParam,{1,'Fornecedor' ,cFornece,PesqPict('SA2','A2_COD')    ,'.t.','FOR','.t.',20,.t.}) //1
-aadd(aParam,{1,"Loja"       ,cLoja   ,PesqPict('SA2','A2_LOJA')   ,'.t.',''   ,'.t.',10,.t.}) //2
-aadd(aParam,{1,"Cond. Pagto",cCondPag,PesqPict('SC7','C7_COND')   ,'NaoVazio().And.ExistCpo("SE4")','SE4','.t.',10,.t.}) //3
-aadd(aParam,{1,"Contato"    ,cContato,PesqPict('SC7','C7_CONTATO'),'.t.',''   ,'.t.',50,.f.}) //4
-aadd(aParam,{1,"Moeda"      ,nMoeda  ,PesqPict('SC7','C7_MOEDA')  ,'.t.',''   ,'.t.',10,.t.}) //5
-aadd(aParam,{1,"Taxa"       ,nTxMoeda,PesqPict('SC7','C7_TXMOEDA'),'.t.',''   ,'.t.',50,.f.}) //6
-aadd(aParam,{1,'TES'        ,cTes    ,PesqPict('SF4','F4_CODIGO') ,'Vazio().Or.ExistCpo("SF4")','SF4','.t.',10,.t.}) //7
-aadd(aParam,{1,"Entrega"    ,dEntrega,"@R 99/99/9999"             ,'.t.',''   ,'.t.',50,.f.}) //8
-aadd(aParam,{1,"Id PO"      ,cIdPo   ,PesqPict('SC7','C7_XCODFOR'),'.t.',''   ,'.t.',50,.f.}) //9
+// tipo, descricao, inicializador, picture, validacao, F3, when, obrigatorio
+AAdd(aParam,{1,'Fornecedor' ,cFornece,PesqPict('SA2','A2_COD')    ,'.T.','FOR','.T.',20,.T.}) //1
+AAdd(aParam,{1,"Loja"       ,cLoja   ,PesqPict('SA2','A2_LOJA')   ,'.T.',''   ,'.T.',10,.T.}) //2
+AAdd(aParam,{1,"Cond. Pagto",cCondPag,PesqPict('SC7','C7_COND')   ,'NaoVazio().And.ExistCpo("SE4")','SE4','.T.',10,.T.}) //3
+AAdd(aParam,{1,"Contato"    ,cContato,PesqPict('SC7','C7_CONTATO'),'.T.',''   ,'.T.',50,.T.}) //4
+AAdd(aParam,{1,"Moeda"      ,nMoeda  ,PesqPict('SC7','C7_MOEDA')  ,'.T.',''   ,'.T.',10,.T.}) //5
+AAdd(aParam,{1,"Taxa"       ,nTxMoeda,PesqPict('SC7','C7_TXMOEDA'),'.T.',''   ,'.T.',50,.T.}) //6
+AAdd(aParam,{1,'TES'        ,cTes    ,PesqPict('SF4','F4_CODIGO') ,'Vazio().Or.ExistCpo("SF4")','SF4','.T.',10,.T.}) //7
+AAdd(aParam,{1,"Entrega"    ,dEntrega,"@R 99/99/9999"             ,'.T.',''   ,'.T.',50,.T.}) //8
+AAdd(aParam,{1,"Id PO"      ,cIdPo   ,PesqPict('SC7','C7_XCODFOR'),'.T.',''   ,'.T.',50,.T.}) //9
 
 If !ParamBox(aParam ,"Dados Pedido Compra",aRetorno)
 	Return
 EndIf
 
 ProcRegua(0)
-aadd(aCabecPC,{"C7_NUM"    ,cNumPC})
-aadd(aCabecPC,{"C7_EMISSAO",dDataBase})
-aadd(aCabecPC,{"C7_FORNECE",aRetorno[1]})
-aadd(aCabecPC,{"C7_LOJA"   ,aRetorno[2]})
-aadd(aCabecPC,{"C7_COND"   ,aRetorno[3]})
-aadd(aCabecPC,{"C7_CONTATO",aRetorno[4]})
-aadd(aCabecPC,{"C7_FILENT" ,xFilial('SC7')})
-aadd(aCabecPC,{"C7_MOEDA"  ,aRetorno[5]})
-aadd(aCabecPC,{"C7_TXMOEDA",aRetorno[6]})
+AAdd(aCabecPC,{"C7_NUM"    ,cNumPC})
+AAdd(aCabecPC,{"C7_EMISSAO",dDataBase})
+AAdd(aCabecPC,{"C7_FORNECE",aRetorno[1]})
+AAdd(aCabecPC,{"C7_LOJA"   ,aRetorno[2]})
+AAdd(aCabecPC,{"C7_COND"   ,aRetorno[3]})
+AAdd(aCabecPC,{"C7_CONTATO",aRetorno[4]})
+AAdd(aCabecPC,{"C7_FILENT" ,xFilial('SC7')})
+AAdd(aCabecPC,{"C7_MOEDA"  ,aRetorno[5]})
+AAdd(aCabecPC,{"C7_TXMOEDA",aRetorno[6]})
 
-for nI := 1 to len(aItens)
+For nI := 1 To Len(aItens)
 
 	IncProc("Gerando Pedido de Compra... Aguarde")
 	// retira ponto
-	cQuant := strtran(aItens[nI][12],'.')
-	cPreco := strtran(aItens[nI][14],'.')
+	cQuant := StrTran(aItens[nI][12],'.')
+	cPreco := StrTran(aItens[nI][14],'.')
 	// substitui virgula por ponto
-	cQuant := strtran(cQuant,',','.')
-	cPreco := strtran(cPreco,',','.')
+	cQuant := StrTran(cQuant,',','.')
+	cPreco := StrTran(cPreco,',','.')
 	
-	cProduto := alltrim(aItens[nI][2])
+	cProduto := AllTrim(aItens[nI][2])
+	// Rotina padrÃ£o jÃ¡ preenche!
 	//cDescPro := Posicione('SB1',1,xFilial('SB1') + cProduto,'B1_DESC')
 	//cUM      := Posicione('SB1',1,xFilial('SB1') + cProduto,'B1_UM')
 	//cLocal   := Posicione('SB1',1,xFilial('SB1') + cProduto,'B1_LOCPAD')
@@ -182,32 +178,32 @@ for nI := 1 to len(aItens)
 	nPreco   := Val(cPreco)
 	nTotal   := nQuant * nPreco
 
-	aadd(aLinha,{"C7_PRODUTO",cProduto   ,nil})
-	aadd(aLinha,{"C7_QUANT"  ,nQuant     ,nil})
-	aadd(aLinha,{"C7_PRECO"  ,nPreco     ,nil})
-	aadd(aLinha,{"C7_TOTAL"  ,nTotal     ,nil})
-	aadd(aLinha,{"C7_TES"    ,aRetorno[7],nil})
-	aadd(aLinha,{"C7_DATPRF" ,aRetorno[8],nil})
-	aadd(aLinha,{'C7_XCODFOR',aRetorno[9],nil})
-	aadd(aItensPC,aLinha)
+	AAdd(aLinha,{"C7_PRODUTO",cProduto   ,nil})
+	AAdd(aLinha,{"C7_QUANT"  ,nQuant     ,nil})
+	AAdd(aLinha,{"C7_PRECO"  ,nPreco     ,nil})
+	AAdd(aLinha,{"C7_TOTAL"  ,nTotal     ,nil})
+	AAdd(aLinha,{"C7_TES"    ,aRetorno[7],nil})
+	AAdd(aLinha,{"C7_DATPRF" ,aRetorno[8],nil})
+	AAdd(aLinha,{'C7_XCODFOR',aRetorno[9],nil})
+	AAdd(aItensPC,aLinha)
 	aLinha := {}	
-next 
+Next 
 
-lMsErroAuto := .f.
+lMsErroAuto := .F.
  
-MsExecAuto({|a,b,c,d,e| MATA120(a,b,c,d,e)},1,aCabecPC,aItensPC,3,.F.) //Inclusão
+MSExecAuto({|a,b,c,d,e| MATA120(a,b,c,d,e)},1,aCabecPC,aItensPC,3,.F.) //InclusÃ£o
 
-if lMsErroAuto 
+If lMsErroAuto 
 	MostraErro()
-else
+Else
 	nRecno := Recno()
 	SC7->(dbGoTo(nRecno))
-	MsgInfo("Foram importados "+ AllTrim(Str(Len(aItens))) +" item(ns).","Importação PO")
-	if MsgYesNo('Deseja abrir o Pedido de Compra '+ cNumPC +'?','Importação PO')
+	MsgInfo("Foram importados "+ AllTrim(Str(Len(aItens))) +" item(ns).","ImportaÃ§Ã£o PO")
+	If MsgYesNo("Deseja abrir o Pedido de Compra "+ cNumPC +"?","ImportaÃ§Ã£o PO")
 		MATA120(1,/*aCabec*/,/*aItens*/,4,.T.)
 		RestArea(aAreaSC7)
 		RestArea(aArea)
-	endif
-endif
+	EndIf
+EndIf
 
-return
+Return
