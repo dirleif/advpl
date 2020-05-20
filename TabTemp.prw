@@ -1,7 +1,7 @@
 #include "totvs.ch"
 //------------------------------------------------------------------------------
 /*/{Protheus.doc} TabTemp
-Criando uma tabela temporária usando a classe FWTemporaryTable
+Criando uma tabela temporÃ¡ria usando a classe FWTemporaryTable
 
 @author 	Dirlei Friedrich
 
@@ -30,15 +30,15 @@ Private oDlg   := Nil
 
 // Define campos do MsSelect
 AAdd(aBrowse,{"OK"       ,,""})  			
-AAdd(aBrowse,{"SERIE"    ,,"Série"})
+AAdd(aBrowse,{"SERIE"    ,,"Sï¿½rie"})
 AAdd(aBrowse,{"DOCUMENTO",,"Documento"})
 AAdd(aBrowse,{"FORNEC"   ,,"Fornecedor"})
 AAdd(aBrowse,{"LOJA"     ,,"Loja"})
 AAdd(aBrowse,{"NOME"     ,,"Nome"})
-AAdd(aBrowse,{"EMISSAO"  ,,"Emissão"})
+AAdd(aBrowse,{"EMISSAO"  ,,"Emissï¿½o"})
 AAdd(aBrowse,{"CHAVE"    ,,"Chave"})
 
-// Define campos tabela temporária
+// Define campos tabela temporÃ¡ria
 AAdd(aStruTmp,{"OK" 	  ,"C",02,0})
 AAdd(aStruTmp,{"SERIE" 	  ,"C",TamSX3("F1_SERIE")[1]  ,TamSX3("F1_SERIE")[2]})
 AAdd(aStruTmp,{"DOCUMENTO","C",TamSX3("F1_DOC")[1]    ,TamSX3("F1_DOC")[2]})
@@ -53,7 +53,7 @@ oTemptable:SetFields(aStruTmp)
 oTempTable:AddIndex('indice1',{'SERIE','DOCUMENTO'})
 oTempTable:Create()
 
-//Pego o alias da tabela temporária
+//Pego o alias da tabela temporÃ¡ria
 cTmpMrk := oTempTable:GetAlias()
 
 // Query
@@ -104,8 +104,8 @@ While !(cAliasZZ1)->(Eof())
 		
 EndDo
 
-// Tela de marcação 
-Define MSDialog oDlg Title "Seleção de Documentos" From 000, 000 to 400, 600 Colors 0, 16777215 Pixel
+// Tela de marcaÃ§Ã£o 
+Define MSDialog oDlg Title "SeleÃ§Ã£o de Documentos" From 000, 000 to 400, 600 Colors 0, 16777215 Pixel
 
 SButton():New(175,225,02,{|| nOpcx:=0,oDlg:End()},oDlg,.T.,,) // Cancelar
 SButton():New(175,255,01,{|| nOpcx:=1,oDlg:End()},oDlg,.T.,,) // Ok
@@ -142,7 +142,7 @@ Rotina para marcar registros
 
 @author		Dirlei@afsouza
 
-@param		nOpc, numerico, Opção da marcação
+@param		nOpc, numerico, OpÃ§Ã£o marcaÃ§Ã£o
 @return 	Nil, nenhum
 
 @type 		function

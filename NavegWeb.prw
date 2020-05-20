@@ -13,8 +13,8 @@ Criando um navegado web.
 //------------------------------------------------------------------------------
 User Function NavegWeb()
 
-Local cHome  := 'https://www.nfe.fazenda.gov.br' // p·gina inicial 
-Local aSize  := MsAdvSize() // funÁ„o que devolve o tamanho da dialog
+Local cHome  := 'https://www.nfe.fazenda.gov.br' // p√°gina inicial 
+Local aSize  := MsAdvSize() // fun√ß√£o que devolve o tamanho da dialog
 
 // prepara o conector WebSocket
 Private oWebChannel := TWebChannel():New()
@@ -30,7 +30,7 @@ Define Dialog oDlg Title 'Navegador Web Protheus' From aSize[7],000 To aSize[6],
     oWebEngine:Align := CONTROL_ALIGN_ALLCLIENT
 	
 	TButton():New( 005,010, "Voltar" , oDlg,{|| oWebEngine:goBack() },040,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	TButton():New( 005,050, "AvanÁar", oDlg,{|| oWebEngine:goForward() },040,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+	TButton():New( 005,050, "Avan√ßar", oDlg,{|| oWebEngine:goForward() },040,010,,,.F.,.T.,.F.,,.F.,,,.F. )
 	TButton():New( 005,100, "Home"   , oDlg,{|| oWebEngine:GoHome() },040,010,,,.F.,.T.,.F.,,.F.,,,.F. )
 	
 Activate Dialog oDlg Centered
